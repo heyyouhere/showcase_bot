@@ -47,7 +47,7 @@ def create_card(image_path, desc):
 
     background_image.paste(mask_image, (0, 0), mask_image)
     draw = ImageDraw.Draw(background_image)
-    font = ImageFont.truetype(font_path, size=40)
+    font = ImageFont.truetype(font_path, size=37)
     drawText(draw, font, desc.upper(), (60, 900))
     output_path= "output.png"
     background_image.save("output.png")
