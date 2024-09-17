@@ -3,7 +3,7 @@ import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
 import description_gen
-
+import textwrap
 
 TOKEN = os.getenv("TG_TOKEN")
 
@@ -17,7 +17,10 @@ async def start(update, context):
 def drawText(draw, font, text : str, position : (int, int)):
     text_color = (255, 255, 255)
     text_size = draw.textbbox((0,0), text, font=font)
-    draw.multiline_text(position, text, fill=text_color, font=font)
+    print(text.split(','))
+    for line in text.split(','):
+        draw.text(position, line.strip(), fill=text_color, font=font)
+        position = (position[0], position[1]+font.size)
 
 
 mask_path = 'mask.png'
@@ -44,8 +47,8 @@ def create_card(image_path, desc):
 
     background_image.paste(mask_image, (0, 0), mask_image)
     draw = ImageDraw.Draw(background_image)
-    font = ImageFont.truetype(font_path, size=36)
-    drawText(draw, font, desc.upper(), (60, 920))
+    font = ImageFont.truetype(font_path, size=40)
+    drawText(draw, font, desc.upper(), (60, 900))
     output_path= "output.png"
     background_image.save("output.png")
     return output_path
@@ -62,8 +65,8 @@ async def send_description(update, context):
     image_path = os.path.join("./inputs", file_name)
     with open(image_path, "wb") as out_file:
         out_file.write(r.content)
-    #desc = description_gen.gererate_ai_description(image_path, prompt)
-    desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
+    desc = description_gen.gererate_ai_description(image_path, prompt)
+    # desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
     output_path = create_card(image_path, desc)
     await update.effective_user.send_photo(photo=open(output_path, 'rb'), caption=desc)
 
