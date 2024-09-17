@@ -17,9 +17,14 @@ async def start(update, context):
 def drawText(draw, font, text : str, position : (int, int)):
     text_color = (255, 255, 255)
     text_size = draw.textbbox((0,0), text, font=font)
-    print(text.split(','))
+    #TODO: ADD ',' at the end of first line normaly
+    need_sym = True
     for line in text.split(','):
-        draw.text(position, line.strip(), fill=text_color, font=font)
+        if need_sym:
+            draw.text(position, line.strip()+',', fill=text_color, font=font)
+            need_sym = False
+        else:
+            draw.text(position, line.strip(), fill=text_color, font=font)
         position = (position[0], position[1]+font.size)
 
 
