@@ -2,7 +2,7 @@ from telegram.ext import Application, MessageHandler, filters, CommandHandler
 import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
-import description_gen
+import openai_integration
 import textwrap
 
 TOKEN = os.getenv("TG_TOKEN")
@@ -70,7 +70,7 @@ async def send_description(update, context):
     image_path = os.path.join("./inputs", file_name)
     with open(image_path, "wb") as out_file:
         out_file.write(r.content)
-    desc = description_gen.gererate_ai_description(image_path, prompt)
+    desc = openai_integration.gererate_ai_description(image_path, prompt)
     # desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
     output_path = create_card(image_path, desc)
     await update.effective_user.send_photo(photo=open(output_path, 'rb'), caption=desc)
