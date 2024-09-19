@@ -1,4 +1,5 @@
-from telegram.ext import Application, MessageHandler, filters, CommandHandler
+from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardButton, KeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import CallbackContext, Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler, ConversationHandler, MessageHandler
 import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
@@ -6,13 +7,20 @@ import openai_integration
 import textwrap
 
 TOKEN = os.getenv("TG_TOKEN")
+TG_CHANNEL_ID = os.getenv("TG_CHANNEL_ID")
+MACHINE_ROLE = os.getenv("MACHINE_ROLE")
+
 
 prompt = 'Я отправлю тебе фотографию, твоя задача сгенерировать ироничную фразу используя контекст фотографии по типу "Я еду на работу, пока все смотрят Nornikel digital week". Фраза должна заканчиваться на "Пока все смотрят Nornikel digital week" и должна быть достаточно короткой, ответь только этой фразой ничего больше не пиши. Фраза ни в коем случае не должна осквернять или быть негативный в сторону Норникеля. Фраза должна быть позитивной.'
 
 target_size=(1024, 1024)
 
+
+WAITING_FOR_PHOTO, BUTTON_INPUT = range(2)
+
 async def start(update, context):
     await update.message.reply_text("Привет! Отправь фотку и получи смешное описание")
+    return WAITING_FOR_PHOTO
 
 def drawText(draw, font, text : str, position : (int, int)):
     text_color = (255, 255, 255)
@@ -31,9 +39,6 @@ def drawText(draw, font, text : str, position : (int, int)):
 mask_path = 'mask.png'
 mask_image = Image.open(mask_path)
 font_path = 'afuturaortobold.ttf'
-
-
-
 
 
 def create_card(image_path, desc):
@@ -58,11 +63,10 @@ def create_card(image_path, desc):
     background_image.save("output.png")
     return output_path
 
-
-
 async def send_description(update, context):
-    user_id = update.message.from_user.id
-    photo = update.message.photo[-1]
+    message = update.message if update.message != None else update.callback_query.message
+    user_id = message.from_user.id
+    photo = message.photo[-1]
     file_id = photo.file_id
     file_name = f"{user_id}_{file_id}.jpg"
     new_file = await context.bot.getFile(file_id)
@@ -70,16 +74,50 @@ async def send_description(update, context):
     image_path = os.path.join("./inputs", file_name)
     with open(image_path, "wb") as out_file:
         out_file.write(r.content)
-    desc = openai_integration.gererate_ai_description(image_path, prompt)
-    # desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
+    if MACHINE_ROLE != 'TEST':
+        desc = openai_integration.gererate_ai_description(image_path, prompt)
+    else:
+        desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
     output_path = create_card(image_path, desc)
-    await update.effective_user.send_photo(photo=open(output_path, 'rb'), caption=desc)
+    keyboard = [
+            [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
+            [InlineKeyboardButton("Поделиться в канал", callback_data="send_to_channel")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.effective_user.send_photo(photo=open(output_path, 'rb'), reply_markup=reply_markup)
+    print("USER STATE : BUTTON_INPUT")
+    return BUTTON_INPUT
 
+
+
+
+async def buttons_handler(update: Update, context: CallbackContext):
+    # await update.callback_query.edit_message_reply_markup(None)
+    await update.callback_query.answer()
+    match update.callback_query.data:
+        case 'gen_again':
+            await send_description(update, context)
+        case 'send_to_channel':
+            await context.bot.copy_message(message_id=update.callback_query.message.message_id, chat_id=TG_CHANNEL_ID, from_chat_id=update.effective_chat.id)
+
+async def fallback_executor(update: Update, context: CallbackContext):
+    await update.effective_chat.send_message("no handler is found")
 
 def main():
     app = Application.builder().token(TOKEN).build()
-    app.add_handler(MessageHandler(filters.PHOTO, send_description))
-    app.add_handler(CommandHandler("start", start))
+
+    conv_handler = ConversationHandler(
+            entry_points=[CommandHandler("start", start)],
+            states={
+                WAITING_FOR_PHOTO : [MessageHandler(filters.PHOTO, send_description), CallbackQueryHandler(buttons_handler)],
+                BUTTON_INPUT : [CallbackQueryHandler(buttons_handler), MessageHandler(filters.PHOTO, send_description)],
+            },
+            fallbacks=[
+                MessageHandler(filters.ALL, fallback_executor)
+                ],
+            )
+
+    app.add_handler(conv_handler)
     app.run_polling()
 
 if __name__ == "__main__":
