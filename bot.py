@@ -78,6 +78,7 @@ async def send_description(update, context):
         desc = openai_integration.gererate_ai_description(image_path, prompt)
     else:
         desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
+
     output_path = create_card(image_path, desc)
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
@@ -103,6 +104,10 @@ async def buttons_handler(update: Update, context: CallbackContext):
 async def fallback_executor(update: Update, context: CallbackContext):
     await update.effective_chat.send_message("no handler is found")
 
+async def generate_from_desc(update: Update, context: CallbackContext):
+    image = openai_integration.generate_image_from_description(update.message.text)
+    await update.effective_chat.send_photo(image)
+
 def main():
     app = Application.builder().token(TOKEN).build()
 
@@ -118,6 +123,7 @@ def main():
             )
 
     app.add_handler(conv_handler)
+    app.add_handler(CommandHandler('/generate', generate_from_desc))
     app.run_polling()
 
 if __name__ == "__main__":
