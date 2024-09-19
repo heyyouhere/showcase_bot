@@ -11,7 +11,7 @@ openai_headers = {
 }
 
 
-def gererate_ai_description(image_path : str, prompt: str) -> str:
+def describtion_of_image(image_path : str, prompt: str) -> str:
     # Getting the base64 string
     with open(image_path, "rb") as image_file:
         base64_image =  base64.b64encode(image_file.read()).decode('utf-8')
@@ -41,7 +41,7 @@ def gererate_ai_description(image_path : str, prompt: str) -> str:
     result = response.json()['choices'][0]['message']['content']
     return result
 
-def generate_image_from_description(prompt: str) -> str:
+def image_from_prompt(prompt: str) -> str:
     payload = {
             "model": "dall-e-3",
             "prompt": prompt,

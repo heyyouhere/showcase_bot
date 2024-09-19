@@ -3,7 +3,7 @@ from telegram.ext import CallbackContext, Application, CommandHandler, ContextTy
 import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
-import openai_integration
+import openai_generation
 import textwrap
 
 TOKEN = os.getenv("TG_TOKEN")
@@ -75,18 +75,17 @@ async def send_description(update, context):
     with open(image_path, "wb") as out_file:
         out_file.write(r.content)
     if MACHINE_ROLE != 'TEST':
-        desc = openai_integration.gererate_ai_description(image_path, prompt)
+        desc = openai_generation.describtion_of_image(image_path, prompt)
     else:
         desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
 
     output_path = create_card(image_path, desc)
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
-            [InlineKeyboardButton("Поделиться в канал", callback_data="send_to_channel")],
+            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.effective_user.send_photo(photo=open(output_path, 'rb'), reply_markup=reply_markup)
-    print("USER STATE : BUTTON_INPUT")
     return BUTTON_INPUT
 
 
@@ -105,14 +104,23 @@ async def fallback_executor(update: Update, context: CallbackContext):
     await update.effective_chat.send_message("no handler is found")
 
 async def generate_from_desc(update: Update, context: CallbackContext):
-    image = openai_integration.generate_image_from_description(update.message.text)
-    await update.effective_chat.send_photo(image)
+    if MACHINE_ROLE != 'TEST':
+        image = openai_generation.image_from_prompt(update.message.text)
+    else:
+        with open('mask.png', 'rb') as f:
+            image = f.readall()
+    keyboard = [
+            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.effective_chat.send_photo(image, caption=update.message.text, reply_markup=reply_markup)
+    return BUTTON_INPUT
 
 def main():
     app = Application.builder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
-            entry_points=[CommandHandler("start", start)],
+            entry_points=[CommandHandler("start", start), CommandHandler('generate', generate_from_desc)],
             states={
                 WAITING_FOR_PHOTO : [MessageHandler(filters.PHOTO, send_description), CallbackQueryHandler(buttons_handler)],
                 BUTTON_INPUT : [CallbackQueryHandler(buttons_handler), MessageHandler(filters.PHOTO, send_description)],
@@ -123,7 +131,6 @@ def main():
             )
 
     app.add_handler(conv_handler)
-    app.add_handler(CommandHandler('/generate', generate_from_desc))
     app.run_polling()
 
 if __name__ == "__main__":
