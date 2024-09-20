@@ -20,7 +20,7 @@ def drawText(draw, font, text : str, position : (int, int)):
 
 mask_path = 'mask.png'
 mask_image = Image.open(mask_path)
-font_path = 'afuturaortobold.ttf'
+font_path = 'ttfirsneue-bold.ttf'
 
 
 def create_card(photo_bytes: bytes, desc: str) -> io.BytesIO:
@@ -38,8 +38,8 @@ def create_card(photo_bytes: bytes, desc: str) -> io.BytesIO:
 
     background_image.paste(mask_image, (0, 0), mask_image)
     draw = ImageDraw.Draw(background_image)
-    font = ImageFont.truetype(font_path, size=37)
-    drawText(draw, font, desc.upper(), (60, 900))
+    font = ImageFont.truetype(font_path, size=27)
+    drawText(draw, font, desc.upper(), (300, 925))
     output_bytes = io.BytesIO()
     background_image.save(output_bytes, format='PNG')
     return output_bytes
