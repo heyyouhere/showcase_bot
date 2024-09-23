@@ -49,6 +49,7 @@ async def send_description(update: Update, context: CallbackContext):
     file_id = message.photo[-1].file_id
     file = await context.bot.getFile(file_id)
     photo_bytes = await file.download_as_bytearray()
+    waiting_message = await update.effective_chat.send_message("⌛️")
 
     if MACHINE_ROLE == 'PROD':
         desc = await openai_generation.description_of_image(photo_bytes, texts.prompt) # TODO: make me async
@@ -60,11 +61,12 @@ async def send_description(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
-            [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
             [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
+            [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
+    await update.effective_chat.delete_message(waiting_message.id)
     await update.effective_user.send_photo(photo=output_bytes_io.getvalue(), reply_markup=reply_markup)
     return BUTTON_INPUT
 
@@ -105,6 +107,8 @@ async def fallback_executor(update: Update, context: CallbackContext):
 
 
 async def generate_from_desc(update: Update, context: CallbackContext):
+    waiting_message = await update.effective_chat.send_message("⌛️")
+
     if MACHINE_ROLE == 'PROD':
         image = await openai_generation.image_from_prompt(update.message.text)
     else:
@@ -113,13 +117,14 @@ async def generate_from_desc(update: Update, context: CallbackContext):
     image = pics.add_watermark(image)
 
     keyboard = [
-            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
             [InlineKeyboardButton("Новая задача", callback_data="image_generation")],
-            [InlineKeyboardButton("Сгенерировать описание", callback_data="description_generation")],
+            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
+            [InlineKeyboardButton("Сгенерировать описание фотографии", callback_data="description_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     problem = texts.problems_descriptions[context.user_data['problem_index']]
     text = update.message.text
+    await update.effective_chat.delete_message(waiting_message.id)
 
     msg = f'<b>Проблема:</b>\n{problem}\n\n\n<b>Решение:</b>\n{text}'
 
