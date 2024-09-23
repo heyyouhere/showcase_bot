@@ -7,14 +7,10 @@ target_size=(1024, 1024)
 def drawText(draw, font, text : str, position : (int, int)):
     text_color = (255, 255, 255)
     text_size = draw.textbbox((0,0), text, font=font)
-    #TODO: ADD ',' at the end of first line normaly
+    lines = textwrap.wrap(text, width=35)
     need_sym = True
-    for line in text.split(','):
-        if need_sym:
-            draw.text(position, line.strip()+',', fill=text_color, font=font)
-            need_sym = False
-        else:
-            draw.text(position, line.strip(), fill=text_color, font=font)
+    for line in lines:
+        draw.text(position, line.strip(), fill=text_color, font=font)
         position = (position[0], position[1]+font.size)
 
 
@@ -39,7 +35,7 @@ def create_card(photo_bytes: bytes, desc: str) -> io.BytesIO:
     background_image.paste(mask_image, (0, 0), mask_image)
     draw = ImageDraw.Draw(background_image)
     font = ImageFont.truetype(font_path, size=31)
-    drawText(draw, font, desc.upper(), (25, 925))
+    drawText(draw, font, desc.upper(), (25, 920))
     output_bytes = io.BytesIO()
     background_image.save(output_bytes, format='PNG')
     return output_bytes
