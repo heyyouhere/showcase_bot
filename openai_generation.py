@@ -10,6 +10,7 @@ client = httpx.AsyncClient(timeout=None)
 
 openai_headers = {
   "Content-Type": "application/json",
+  "Cache-Control": "no-cache",
   "Authorization": f"Bearer {api_key}"
 }
 
