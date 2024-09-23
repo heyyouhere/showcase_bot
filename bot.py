@@ -72,7 +72,7 @@ async def send_description(update: Update, context: CallbackContext):
         caption = f'\n<b>Автор:</b> @{update.effective_user.username}'
 
     await update.effective_chat.delete_message(waiting_message.id)
-    await update.effective_user.send_photo(photo=output_bytes_io.getvalue(), caption=caption, reply_markup=reply_markup)
+    await update.effective_user.send_photo(photo=output_bytes_io.getvalue(), caption=caption, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
     return BUTTON_INPUT
 
 
