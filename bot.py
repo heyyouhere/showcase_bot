@@ -58,6 +58,7 @@ async def send_description(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
+            [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
             [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -106,6 +107,8 @@ async def generate_from_desc(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
+            [InlineKeyboardButton("Новая задача", callback_data="image_generation")],
+            [InlineKeyboardButton("Сгенерировать описание", callback_data="description_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     problem = context.user_data['problem']
