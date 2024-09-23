@@ -1,10 +1,12 @@
 from openai import OpenAI
 import base64
 import requests
+import httpx
 import os
 import random
-api_key= os.getenv("OPENAI_TOKEN")
 
+api_key= os.getenv("OPENAI_TOKEN")
+client = httpx.AsyncClient(timeout=None)
 
 openai_headers = {
   "Content-Type": "application/json",
@@ -12,7 +14,7 @@ openai_headers = {
 }
 
 
-def description_of_image(image_bytes : bytes, prompt: str) -> str:
+async def description_of_image(image_bytes : bytes, prompt: str) -> str:
     # Getting the base64 string
     base64_image =  base64.b64encode(image_bytes).decode('utf-8')
     payload = {
@@ -37,21 +39,21 @@ def description_of_image(image_bytes : bytes, prompt: str) -> str:
       ],
       "max_tokens": 300
     }
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=openai_headers, json=payload)
+
+    response = await client.post("https://api.openai.com/v1/chat/completions", headers=openai_headers, json=payload)
     result = response.json()['choices'][0]['message']['content']
     return result
 
-def image_from_prompt(prompt: str) -> bytes:
+async def image_from_prompt(prompt: str) -> bytes:
     payload = {
             "model": "dall-e-3",
             "prompt": prompt,
             "n": 1,
             "size": "1024x1024"
     }
-    response = requests.post("https://api.openai.com/v1/images/generations", headers=openai_headers, json=payload)
-    # response.raise_for_status()
+    response = await client.post("https://api.openai.com/v1/images/generations", headers=openai_headers, json=payload)
     image_url = response.json()["data"][0]['url']
-    image_res = requests.get(image_url)
+    image_res = await client.get(image_url)
     return image_res.content
 
 

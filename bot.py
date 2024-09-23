@@ -51,7 +51,7 @@ async def send_description(update: Update, context: CallbackContext):
     photo_bytes = await file.download_as_bytearray()
 
     if MACHINE_ROLE == 'PROD':
-        desc = openai_generation.description_of_image(photo_bytes, texts.prompt) # TODO: make me async
+        desc = await openai_generation.description_of_image(photo_bytes, texts.prompt) # TODO: make me async
     else:
         desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
 
@@ -105,7 +105,7 @@ async def fallback_executor(update: Update, context: CallbackContext):
 
 async def generate_from_desc(update: Update, context: CallbackContext):
     if MACHINE_ROLE == 'PROD':
-        image = openai_generation.image_from_prompt(update.message.text)
+        image = await openai_generation.image_from_prompt(update.message.text)
     else:
         with open('generated.png', 'rb') as f:
             image = f.read()
