@@ -17,7 +17,7 @@ def description_of_image(image_bytes : bytes, prompt: str) -> str:
     base64_image =  base64.b64encode(image_bytes).decode('utf-8')
     payload = {
       "model": "gpt-4o",
-      "seed" : int(random.random()*1000),
+      "temperature": 1.1,
       "messages": [
         {
           "role": "user",

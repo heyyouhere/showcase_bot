@@ -21,6 +21,7 @@ WAITING_FOR_PHOTO, WAITING_FOR_IMAGE_PROMPT,  BUTTON_INPUT = range(3)
 
 
 async def start(update: Update, context: CallbackContext):
+    context.user_data['played_problems'] = []
     await update.effective_chat.send_message(texts.intro)
     return await check_if_member(update, context)
 
@@ -81,9 +82,13 @@ async def buttons_handler(update: Update, context: CallbackContext):
 
         case "image_generation":
             await update.effective_chat.send_message(texts.image_gen_welcome)
-            problem = texts.problems_descriptions[random.randint(0, len(texts.problems_descriptions)-1)]
-            context.user_data['problem'] = problem
-            await update.effective_chat.send_message(problem)
+            if context.user_data.get('problem_index') == None:
+                problem_index = random.randint(0, len(texts.problems_descriptions)-1)
+                context.user_data['problem_index'] = problem_index
+            else:
+                context.user_data['problem_index'] = (context.user_data['problem_index'] + 1) % len(texts.problems_descriptions)
+
+            await update.effective_chat.send_message(texts.problems_descriptions[context.user_data['problem_index']])
             return WAITING_FOR_IMAGE_PROMPT
 
         case 'gen_again':
@@ -112,7 +117,7 @@ async def generate_from_desc(update: Update, context: CallbackContext):
             [InlineKeyboardButton("Сгенерировать описание", callback_data="description_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    problem = context.user_data['problem']
+    problem = texts.problems_descriptions[context.user_data['problem_index']]
     text = update.message.text
 
     msg = f'<b>Проблема:</b>\n{problem}\n\n\n<b>Решение:</b>\n{text}'
