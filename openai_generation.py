@@ -2,6 +2,7 @@ from openai import OpenAI
 import base64
 import requests
 import os
+import random
 api_key= os.getenv("OPENAI_TOKEN")
 
 
@@ -16,6 +17,7 @@ def description_of_image(image_bytes : bytes, prompt: str) -> str:
     base64_image =  base64.b64encode(image_bytes).decode('utf-8')
     payload = {
       "model": "gpt-4o",
+      "seed" : random.random()*1000
       "messages": [
         {
           "role": "user",
