@@ -104,6 +104,7 @@ async def generate_from_desc(update: Update, context: CallbackContext):
     else:
         with open('generated.png', 'rb') as f:
             image = f.read()
+    image = pics.add_watermark(image)
 
     keyboard = [
             [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
@@ -116,7 +117,7 @@ async def generate_from_desc(update: Update, context: CallbackContext):
 
     msg = f'<b>Проблема:</b>\n{problem}\n\n\n<b>Решение:</b>\n{text}'
 
-    await update.effective_chat.send_photo(image, caption=msg, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
+    await update.effective_chat.send_photo(image.getvalue(), caption=msg, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
     return BUTTON_INPUT
 
 

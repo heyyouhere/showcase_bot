@@ -38,8 +38,19 @@ def create_card(photo_bytes: bytes, desc: str) -> io.BytesIO:
 
     background_image.paste(mask_image, (0, 0), mask_image)
     draw = ImageDraw.Draw(background_image)
-    font = ImageFont.truetype(font_path, size=27)
-    drawText(draw, font, desc.upper(), (300, 925))
+    font = ImageFont.truetype(font_path, size=31)
+    drawText(draw, font, desc.upper(), (25, 925))
+    output_bytes = io.BytesIO()
+    background_image.save(output_bytes, format='PNG')
+    return output_bytes
+
+
+watermark_path = 'watermark.png'
+watermark_image = Image.open(watermark_path)
+
+def add_watermark(image_bytes: bytes) -> io.BytesIO:
+    background_image = Image.open(io.BytesIO(image_bytes))
+    background_image.paste(watermark_image, (0, 0), watermark_image)
     output_bytes = io.BytesIO()
     background_image.save(output_bytes, format='PNG')
     return output_bytes
