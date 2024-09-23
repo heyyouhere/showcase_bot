@@ -66,8 +66,13 @@ async def send_description(update: Update, context: CallbackContext):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
+    caption = ''
+    username = update.effective_user.username
+    if username != None and username != '':
+        caption = f'\n<b>Автор:</b> @{update.effective_user.username}'
+
     await update.effective_chat.delete_message(waiting_message.id)
-    await update.effective_user.send_photo(photo=output_bytes_io.getvalue(), reply_markup=reply_markup)
+    await update.effective_user.send_photo(photo=output_bytes_io.getvalue(), caption=caption, reply_markup=reply_markup)
     return BUTTON_INPUT
 
 
@@ -126,7 +131,10 @@ async def generate_from_desc(update: Update, context: CallbackContext):
     text = update.message.text
     await update.effective_chat.delete_message(waiting_message.id)
 
-    msg = f'<b>Проблема:</b>\n{problem}\n\n\n<b>Решение:</b>\n{text}'
+    msg = f'<b>Проблема:</b>\n{problem}\n\n<b>Решение:</b>\n{text}'
+    username = update.effective_user.username
+    if username != None and username != '':
+        msg += f'\n\n<b>Автор:</b> @{update.effective_user.username}'
 
     await update.effective_chat.send_photo(image.getvalue(), caption=msg, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
     return BUTTON_INPUT
