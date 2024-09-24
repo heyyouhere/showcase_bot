@@ -54,8 +54,8 @@ async def send_description(update: Update, context: CallbackContext):
     if MACHINE_ROLE == 'PROD':
         desc = await openai_generation.description_of_image(photo_bytes, texts.prompt) # TODO: make me async
     else:
-        desc = "Я учу секреты продуктивности, пока все смотрят Nornikel digital week."
-        # desc = "Я учу секреты продуктивности у лучших специалистов индустрии, пока все смотрят Nornikel digital week."
+        desc = "Я учу секреты продуктивности, пока все смотрят Nornickel digital week."
+        # desc = "Я учу секреты продуктивности у лучших специалистов индустрии, пока все смотрят Nornickel digital week."
 
     output_bytes_io = pics.create_card(photo_bytes, desc)
 
