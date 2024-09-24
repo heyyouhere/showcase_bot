@@ -152,7 +152,7 @@ def main():
                 WAITING_FOR_IMAGE_PROMPT : [MessageHandler(filters.TEXT, generate_from_desc)]
             },
             fallbacks=[
-                MessageHandler(filters.ALL, fallback_executor)
+                MessageHandler(filters.ALL, check_if_member)
                 ],
             )
     app.add_handler(conv_handler)
