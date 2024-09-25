@@ -17,12 +17,14 @@ MACHINE_ROLE = os.getenv("MACHINE_ROLE")
 
 
 
+# hello_photo =  open("start_image.jpg").read()
 WAITING_FOR_PHOTO, WAITING_FOR_IMAGE_PROMPT,  BUTTON_INPUT = range(3)
 
 
 async def start(update: Update, context: CallbackContext):
     context.user_data['played_problems'] = []
-    await update.effective_chat.send_message(texts.intro)
+    await update.effective_chat.send_photo("start_image.jpg", caption=texts.intro)
+    await update.effective_chat.send_message(texts.share)
     return await check_if_member(update, context)
 
 
@@ -61,7 +63,7 @@ async def send_description(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
-            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
+            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_descrition")],
             [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -102,9 +104,24 @@ async def buttons_handler(update: Update, context: CallbackContext):
         case 'gen_again':
             await send_description(update, context)
 
-        case 'send_to_channel':
-            await update.callback_query.edit_message_reply_markup(None)
+        case 'send_to_channel_from_descrition':
+            keyboard = [
+                    [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
+                    [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.callback_query.edit_message_reply_markup(reply_markup)
             await context.bot.copy_message(message_id=update.callback_query.message.message_id, chat_id=TG_CHANNEL_ID, from_chat_id=update.effective_chat.id)
+
+        case 'send_to_channel_from_image':
+            keyboard = [
+                    [InlineKeyboardButton("Новая задача", callback_data="image_generation")],
+                    [InlineKeyboardButton("Сгенерировать описание фотографии", callback_data="description_generation")],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.callback_query.edit_message_reply_markup(reply_markup)
+            await context.bot.copy_message(message_id=update.callback_query.message.message_id, chat_id=TG_CHANNEL_ID, from_chat_id=update.effective_chat.id)
+
 
 
 async def fallback_executor(update: Update, context: CallbackContext):
@@ -123,7 +140,7 @@ async def generate_from_desc(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Новая задача", callback_data="image_generation")],
-            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel")],
+            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_image")],
             [InlineKeyboardButton("Сгенерировать описание фотографии", callback_data="description_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
