@@ -64,7 +64,7 @@ async def send_description(update: Update, context: CallbackContext):
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
             [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_descrition")],
-            [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
+            [InlineKeyboardButton("Решить проблему будущего", callback_data="image_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -107,7 +107,7 @@ async def buttons_handler(update: Update, context: CallbackContext):
         case 'send_to_channel_from_descrition':
             keyboard = [
                     [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
-                    [InlineKeyboardButton("Решить задачу будущего", callback_data="image_generation")],
+                    [InlineKeyboardButton("Решить проблему будущего", callback_data="image_generation")],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.callback_query.edit_message_reply_markup(reply_markup)
@@ -115,8 +115,8 @@ async def buttons_handler(update: Update, context: CallbackContext):
 
         case 'send_to_channel_from_image':
             keyboard = [
-                    [InlineKeyboardButton("Новая задача", callback_data="image_generation")],
-                    [InlineKeyboardButton("Сгенерировать описание фотографии", callback_data="description_generation")],
+                    [InlineKeyboardButton("Новая проблема", callback_data="image_generation")],
+                    [InlineKeyboardButton("Придумать подпись к фото", callback_data="description_generation")],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.callback_query.edit_message_reply_markup(reply_markup)
@@ -139,9 +139,9 @@ async def generate_from_desc(update: Update, context: CallbackContext):
     image = pics.add_watermark(image)
 
     keyboard = [
-            [InlineKeyboardButton("Новая задача", callback_data="image_generation")],
+            [InlineKeyboardButton("Новая проблема", callback_data="image_generation")],
             [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_image")],
-            [InlineKeyboardButton("Сгенерировать описание фотографии", callback_data="description_generation")],
+            [InlineKeyboardButton("Придумать подпись к фото", callback_data="description_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     problem = texts.problems_descriptions[context.user_data['problem_index']]
