@@ -1,4 +1,4 @@
-from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardButton, KeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatMemberLeft
+from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardButton, KeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatMemberLeft, ChatMemberBanned
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler, ConversationHandler, MessageHandler
 
@@ -85,6 +85,9 @@ async def send_description(update: Update, context: CallbackContext):
 
 async def buttons_handler(update: Update, context: CallbackContext):
     # await update.callback_query.edit_message_reply_markup(None)
+    is_user_banned = type(await context.bot.getChatMember(TG_CHANNEL_ID, update.effective_user.id)) == ChatMemberBanned
+    if is_user_banned:
+        return
     await update.callback_query.answer()
     match update.callback_query.data:
         case "check_for_membership":
