@@ -87,6 +87,7 @@ async def buttons_handler(update: Update, context: CallbackContext):
     # await update.callback_query.edit_message_reply_markup(None)
     is_user_banned = type(await context.bot.getChatMember(TG_CHANNEL_ID, update.effective_user.id)) == ChatMemberBanned
     if is_user_banned:
+        await update.effective_chat.send_message("Вы забанены.")
         return
     await update.callback_query.answer()
     match update.callback_query.data:
