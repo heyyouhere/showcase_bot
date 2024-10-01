@@ -46,15 +46,20 @@ async def check_if_member(update: Update, context: CallbackContext):
     return BUTTON_INPUT
 
 
-async def send_description(update: Update, context: CallbackContext):
-    message = update.message if update.message != None else update.callback_query.message
+async def send_description_new(update: Update, context: CallbackContext):
+    message = update.message
     file_id = message.photo[-1].file_id
+    context.user_data['file_id'] = file_id
+    await send_description(update, context)
+
+async def send_description(update: Update, context: CallbackContext):
+    file_id = context.user_data.get('file_id')
     file = await context.bot.getFile(file_id)
     photo_bytes = await file.download_as_bytearray()
     waiting_message = await update.effective_chat.send_message("⌛️")
 
     if MACHINE_ROLE == 'PROD':
-        desc = await openai_generation.description_of_image(photo_bytes, texts.prompt) # TODO: make me async
+        desc = await openai_generation.description_of_image(photo_bytes, texts.prompt)
     else:
         desc = "Я учу секреты продуктивности, пока все смотрят Nornickel digital week."
         # desc = "Я учу секреты продуктивности у лучших специалистов индустрии, пока все смотрят Nornickel digital week."
@@ -164,8 +169,8 @@ def main():
     conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", start)],
             states={
-                WAITING_FOR_PHOTO : [MessageHandler(filters.PHOTO, send_description), CallbackQueryHandler(buttons_handler)],
-                BUTTON_INPUT : [CallbackQueryHandler(buttons_handler), MessageHandler(filters.PHOTO, send_description)],
+                WAITING_FOR_PHOTO : [MessageHandler(filters.PHOTO, send_description_new), CallbackQueryHandler(buttons_handler)],
+                BUTTON_INPUT : [CallbackQueryHandler(buttons_handler), MessageHandler(filters.PHOTO, send_description_new)],
                 WAITING_FOR_IMAGE_PROMPT : [MessageHandler(filters.TEXT, generate_from_desc)]
             },
             fallbacks=[
