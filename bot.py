@@ -171,7 +171,7 @@ def main():
     app = Application.builder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
-            entry_points=[CommandHandler("start", start)],
+            entry_points=[CommandHandler("start", start),  CallbackQueryHandler(buttons_handler)],
             states={
                 WAITING_FOR_PHOTO : [MessageHandler(filters.PHOTO, send_description_new), CallbackQueryHandler(buttons_handler)],
                 BUTTON_INPUT : [CallbackQueryHandler(buttons_handler), MessageHandler(filters.PHOTO, send_description_new)],
