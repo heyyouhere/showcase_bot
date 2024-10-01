@@ -175,7 +175,7 @@ def main():
             states={
                 WAITING_FOR_PHOTO : [MessageHandler(filters.PHOTO, send_description_new), CallbackQueryHandler(buttons_handler)],
                 BUTTON_INPUT : [CallbackQueryHandler(buttons_handler), MessageHandler(filters.PHOTO, send_description_new)],
-                WAITING_FOR_IMAGE_PROMPT : [MessageHandler(filters.TEXT, generate_from_desc)]
+                WAITING_FOR_IMAGE_PROMPT : [MessageHandler(filters.TEXT, generate_from_desc), CallbackQueryHandler(buttons_handler)]
             },
             fallbacks=[
                 MessageHandler(filters.ALL, check_if_member)
