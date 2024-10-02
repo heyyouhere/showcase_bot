@@ -26,7 +26,7 @@ def create_card(photo_bytes: bytes, desc: str) -> io.BytesIO:
     factor = target_size[0]/x
     new_size = (int(size[0]*factor), int(size[1]*factor))
     background_image = background_image.resize(new_size)
-    if new_size[0] == target_size[0]:
+    if abs(new_size[0] - target_size[0]) <= 1: #sometimes new_size is 1023 due to floats
         crop_box = (0, (new_size[1] - target_size[1])/2, new_size[0],  new_size[1]/2 + target_size[1]/2)
     else:
         crop_box = ((new_size[0] - target_size[0])/2, 0,  new_size[0]/2 + target_size[0]/2, new_size[1])
