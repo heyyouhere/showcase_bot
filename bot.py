@@ -29,7 +29,8 @@ async def start(update: Update, context: CallbackContext):
 
 
 async def check_if_member(update: Update, context: CallbackContext):
-    check = type(await context.bot.getChatMember(TG_CHANNEL_ID, update.effective_user.id)) != ChatMemberLeft
+    # check = type(await context.bot.getChatMember(TG_CHANNEL_ID, update.effective_user.id)) != ChatMemberLeft
+    check = True
     if check:
         keyboard = [
                 [InlineKeyboardButton(texts.choose_buttons[0], callback_data="description_generation")],
@@ -68,7 +69,7 @@ async def send_description(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Сгенерировать ещё", callback_data="gen_again")],
-            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_descrition")],
+            # [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_descrition")],
             [InlineKeyboardButton("Решить проблему будущего", callback_data="image_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -85,10 +86,10 @@ async def send_description(update: Update, context: CallbackContext):
 
 async def buttons_handler(update: Update, context: CallbackContext):
     # await update.callback_query.edit_message_reply_markup(None)
-    is_user_banned = type(await context.bot.getChatMember(TG_CHANNEL_ID, update.effective_user.id)) == ChatMemberBanned
-    if is_user_banned:
-        await update.effective_chat.send_message("Вы забанены.")
-        return
+    # is_user_banned = type(await context.bot.getChatMember(TG_CHANNEL_ID, update.effective_user.id)) == ChatMemberBanned
+    # if is_user_banned:
+    #     await update.effective_chat.send_message("Вы забанены.")
+    #     return
     await update.callback_query.answer()
     match update.callback_query.data:
         case "check_for_membership":
@@ -149,7 +150,7 @@ async def generate_from_desc(update: Update, context: CallbackContext):
 
     keyboard = [
             [InlineKeyboardButton("Новая проблема", callback_data="image_generation")],
-            [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_image")],
+            # [InlineKeyboardButton("Отправить в канал", callback_data="send_to_channel_from_image")],
             [InlineKeyboardButton("Придумать подпись к фото", callback_data="description_generation")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
